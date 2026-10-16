@@ -7,6 +7,7 @@
 //   - play フェンス → <ox-code-play> のラップ数(@ox-content/code-play)
 //   - wgsl/asm/llvm/toml の未ハイライトブロック残存(highlight-fallback)
 //   - 前後ページリンクの出力(ssg.pagination)
+//   - Cloudflare Web Analytics ビーコンの全ページ挿入(theme.embed.head)
 // vite.config.ts の closeBundle から呼ばれるほか、単体でも実行できる:
 //   node scripts/verify-build.mjs
 import { globSync, readFileSync, existsSync } from 'node:fs';
@@ -88,6 +89,10 @@ export function verifyBuild(outDir = 'dist') {
       if (html.includes(`<pre><code class="language-${lang}">`)) {
         errors.push(`${lang} が未ハイライト: ${htmlPath}`);
       }
+    }
+
+    if (!html.includes('static.cloudflareinsights.com/beacon.min.js')) {
+      errors.push(`Web Analytics ビーコン未挿入: ${htmlPath}`);
     }
 
     if (html.includes('class="pager"')) pagerTotal++;

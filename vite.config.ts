@@ -10,6 +10,8 @@ import { highlightFallback } from './scripts/highlight-fallback.mjs';
 import { verifyBuild } from './scripts/verify-build.mjs';
 import { buildSidebar } from './config/sidebar.mjs';
 
+const CF_WEB_ANALYTICS_TOKEN = '24973791b48c48a29406c0e67fc2efca';
+
 // docs/ を ox-content が読む .ox-docs/ へ展開する(RustPlay → play フェンス)。
 // SSG・検索・devサーバは全て srcDir をディスクから直接読むため、
 // Vite の transform ではなくビルド前のファイル生成で行う。
@@ -103,7 +105,9 @@ export default defineConfig({
             // v3 で右カラム目次(On this page)が opt-in になった
             aside: true,
             embed: {
-              head: '<link rel="icon" type="image/svg+xml" href="/logo.svg">',
+              head:
+                '<link rel="icon" type="image/svg+xml" href="/logo.svg">' +
+                `<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "${CF_WEB_ANALYTICS_TOKEN}"}'></script>`,
             },
             sidebar: buildSidebar(),
             css: readFileSync('src/theme/custom.css', 'utf8'),
