@@ -1,0 +1,322 @@
+/* ---- Starlight 互換のCSS変数レイヤー ----
+   本文中の手書きSVG図(7ページ・38箇所)は var(--sl-color-*) を参照して
+   いるため、コンテンツを書き換えずに ox-content のテーマ変数(--octc-*)
+   へ橋渡しする。--octc-* はライト/ダークで値ごと切り替わるので、
+   ここでの割り当てだけで両テーマに追従する。
+   グレースケール(gray-1〜7)は Starlight の「テキスト色→背景色」の
+   段階を color-mix で再現する。 */
+:root {
+  --sl-color-white: var(--octc-color-text);
+  --sl-color-black: var(--octc-color-bg);
+  --sl-color-gray-1: color-mix(in srgb, var(--octc-color-text) 90%, var(--octc-color-bg));
+  --sl-color-gray-2: color-mix(in srgb, var(--octc-color-text) 76%, var(--octc-color-bg));
+  --sl-color-gray-3: color-mix(in srgb, var(--octc-color-text) 55%, var(--octc-color-bg));
+  --sl-color-gray-4: color-mix(in srgb, var(--octc-color-text) 35%, var(--octc-color-bg));
+  --sl-color-gray-5: color-mix(in srgb, var(--octc-color-text) 22%, var(--octc-color-bg));
+  --sl-color-gray-6: color-mix(in srgb, var(--octc-color-text) 12%, var(--octc-color-bg));
+  --sl-color-gray-7: color-mix(in srgb, var(--octc-color-text) 6%, var(--octc-color-bg));
+  --sl-color-accent: var(--octc-color-primary);
+  --sl-color-accent-high: var(--octc-color-primary-hover, var(--octc-color-primary));
+  --sl-color-accent-low: color-mix(in srgb, var(--octc-color-primary) 22%, var(--octc-color-bg));
+  --sl-color-orange: #b06000;
+  --sl-color-orange-low: color-mix(in srgb, #b06000 18%, var(--octc-color-bg));
+  --sl-color-red: #d02f4c;
+  --sl-text-sm: 0.875rem;
+  --sl-text-xs: 0.8125rem;
+  --__sl-font-mono: var(--octc-font-mono, ui-monospace, monospace);
+}
+
+:root[data-theme='dark'] {
+  --sl-color-orange: #e0af68;
+  --sl-color-red: #f7768e;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --sl-color-orange: #e0af68;
+    --sl-color-red: #f7768e;
+  }
+}
+
+/* ---- ヘッダーを全幅の帯として独立させる ----
+   holoスキンは .sidebar/.toc を top:0 で画面最上部まで伸ばし、透過
+   ヘッダーを列の上に重ねるため、タイトルがサイドバー境界線をまたぐ。
+   列をヘッダーの下から開始させて回り込ませる。スクロール時に本文が
+   ヘッダー下へ潜る挙動(fixed + z-index)は維持する。
+   768px以下はサイドバーがボトムシートになるため対象外。 */
+@media (min-width: 769px) {
+  .sidebar {
+    top: var(--octc-header-height);
+    padding-top: 1rem;
+  }
+
+  .toc {
+    top: var(--octc-header-height);
+    padding-top: 2rem;
+  }
+}
+
+/* ヘッダー帯の輪郭。holoが消したborder-bottomをドキュメントページ
+   でのみ戻す(エントリページはヒーローに重ねる意匠のまま)。 */
+body:not(.entry-page) .header {
+  border-bottom: 1px solid color-mix(in srgb, var(--octc-color-border) 48%, transparent);
+}
+
+/* モバイルのサイドバーは alpha.9 (#915) から「header〜footer 間のフル
+   シートを translateY で開閉し、内部を overflow-y: auto でスクロール」
+   という設計になった。holoの無スコープな top:0 がベーステーマの
+   top: var(--octc-header-height) を上書きしてシートがヘッダーの裏まで
+   伸びるため、ベーステーマの値へ戻す(top を外すと高さ制約が消えて
+   シートがコンテンツ全高になり、内部スクロールが死ぬ)。 */
+@media (max-width: 768px) {
+  .sidebar {
+    top: var(--octc-header-height);
+    padding-top: 1.5rem;
+  }
+
+  /* ベーステーマの左右padding(0.5rem、480px以下は0.4rem)は本文が
+     画面端に張り付いて窮屈なので少し広げる。 */
+  .main {
+    padding-inline: 1rem;
+  }
+
+  /* holoの overflow:hidden がベースの overflow-x:auto を潰し、幅広
+     テーブルを横スクロールできなくなるため戻す。 */
+  .content table {
+    overflow-x: auto;
+  }
+
+  /* モバイルではページ遷移(cross-document view transition)の後に
+     ヘッダーの backdrop-filter が効かなくなる(WebKit系の挙動)。
+     ヘッダーを遷移スナップショット(view-transition-name)から外し、
+     スクロール連動のブラー導入アニメーション(octc-header-settle)も
+     使わず、ダイレクトアクセス時と同じ常時ブラーに固定する。 */
+  body:not(.entry-page) .header {
+    view-transition-name: none;
+    animation: none;
+    backdrop-filter: blur(14px) saturate(150%);
+    -webkit-backdrop-filter: blur(14px) saturate(150%);
+  }
+}
+
+/* ---- Code Play: インタラクティブ実行ブロック ----
+   ウィジェット本体(枠・ツールバー・タブ)は @ox-content/code-play が
+   注入する CODE_PLAY_STYLES が --octc-* 変数で描画する。ここでは
+   本文フォントへの追従と、タイトルバー(.play-title)の結合のみ行う。 */
+ox-code-play {
+  display: block;
+}
+
+/* preprocess-docs.mjs が RustPlay の title 属性から生成するタイトルバー。
+   直後の Code Play ウィジェットと1つの箱に見えるよう結合する。 */
+.play-title {
+  margin: 1.25rem 0 0;
+  padding: 0.4rem 1rem 0.35rem;
+  border: 1px solid var(--octc-color-border);
+  border-bottom: none;
+  border-radius: 12px 12px 0 0;
+  background: var(--sl-color-gray-6);
+  color: var(--octc-color-text);
+  font-size: var(--sl-text-sm);
+  font-weight: 600;
+}
+
+.play-title + ox-code-play {
+  margin-top: 0;
+}
+
+.play-title + ox-code-play .ox-code-play,
+.play-title + ox-code-play > pre {
+  margin-top: 0;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
+/* holoスキンの .content pre (箔ボーダー+丸角+background!important) を
+   ウィジェット内ではフラットに戻す。 */
+.content ox-code-play pre {
+  margin: 0;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+/* 実行結果や設定パネルの文字はコード用フォントに合わせる */
+.ox-code-play__panel pre,
+.ox-code-play__panel code {
+  font-family: var(--__sl-font-mono);
+  font-size: var(--sl-text-xs);
+}
+
+/* ---- Aside (:::note → v3 containers) ----
+   枠・ティント・タイトルは ssg.css の .ox-container が描画する。
+   デフォルトの左ボーダー(3px)は角丸に巻き込まれて曲がって見えるため、
+   旧 :::note 実装と同じくボーダー無しのティント箱にする。
+   日本語ラベル「ノート」向けにタイトルの字詰めも調整する。 */
+.content .ox-container {
+  border-left: none;
+}
+
+.content .ox-container-title {
+  font-size: var(--sl-text-sm);
+  letter-spacing: 0.02em;
+}
+
+/* ---- 前後ページリンク (v3 ssg.pagination) ----
+   デフォルトはテキストリンクのみなので、旧 inject-pager と同じ
+   カード型に整える。ラベルの日本語化は ja-ui.js が行う。 */
+.pager {
+  gap: 1rem;
+  margin-top: 3rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--octc-color-border);
+  justify-content: space-between;
+  font-size: inherit;
+}
+
+.pager-link {
+  width: calc(50% - 0.5rem);
+  gap: 0.35rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--octc-color-border);
+  border-radius: 0.5rem;
+  transition:
+    background-color var(--octc-motion-fast) var(--octc-motion-ease),
+    transform var(--octc-motion-base) var(--octc-motion-spring);
+}
+
+/* ホバーはサイドメニュー/目次と同じ仕様(背景ティント+右シフト)。
+   ボーダー色や文字色は変えない。 */
+.pager-link:hover {
+  background: color-mix(in srgb, var(--octc-accent-c, var(--octc-color-primary)) 14%, transparent);
+  transform: translateX(3px);
+  text-decoration: none;
+}
+
+.pager-link:hover .pager-title {
+  color: var(--octc-color-text);
+}
+
+.pager-label {
+  font-size: var(--sl-text-xs);
+  color: var(--sl-color-gray-3);
+}
+
+.pager-title {
+  font-weight: 600;
+  color: var(--octc-color-text);
+  overflow-wrap: anywhere;
+}
+
+.pager-link--prev .pager-title::before {
+  content: '← ';
+}
+
+.pager-link--next .pager-title::after {
+  content: ' →';
+}
+
+@media (max-width: 640px) {
+  .pager {
+    flex-direction: column;
+  }
+
+  .pager-link {
+    width: 100%;
+  }
+
+  .pager-link--next {
+    text-align: left;
+    margin-left: 0;
+  }
+}
+
+/* ---- テーブルの角丸整合 ----
+   holoは .content table に border-radius:12px + overflow:hidden を当てる
+   が、ベースはセル個別ボーダーの border-collapse:collapse のため、角で
+   セルのボーダーと背景が斜めに切れて見える。外周ボーダーをtable本体に
+   持たせ、セルは内側の区切り線のみとし、コーナーセルへ外周と揃う丸みを
+   与える。 */
+.content table {
+  border-collapse: separate;
+  border-spacing: 0;
+  border: 1px solid var(--octc-color-border);
+  border-radius: 12px;
+}
+
+.content th,
+.content td {
+  border: 0;
+  border-block-end: 1px solid var(--octc-color-border);
+  border-inline-end: 1px solid var(--octc-color-border);
+}
+
+/* 最終列・最終行の区切り線は外周ボーダーと二重になるため消す */
+.content table tr > :last-child {
+  border-inline-end: 0;
+}
+
+.content table > :last-child > tr:last-child > * {
+  border-block-end: 0;
+}
+
+/* 外周半径12pxからボーダー1px分を引いた丸みをコーナーセルへ */
+.content table > :first-child > tr:first-child > :first-child {
+  border-start-start-radius: 11px;
+}
+
+.content table > :first-child > tr:first-child > :last-child {
+  border-start-end-radius: 11px;
+}
+
+.content table > :last-child > tr:last-child > :first-child {
+  border-end-start-radius: 11px;
+}
+
+.content table > :last-child > tr:last-child > :last-child {
+  border-end-end-radius: 11px;
+}
+
+/* ---- 目次ホバーをサイドメニューと揃える ----
+   ベーステーマは .toc-link:hover に左ボーダーとプライマリ文字色を
+   与えるが、サイドメニュー(.nav-link:hover)は背景ティント+通常文字色
+   (ティントとtranslateXはholoが両者に付与)。目次も同じ挙動にする。 */
+.toc-link {
+  border-left: 0;
+}
+
+.toc-link:hover {
+  color: var(--octc-color-text);
+}
+
+/* ---- 本文の折り返しを通常の貪欲アルゴリズムに戻す ----
+   holoは本文に text-wrap:pretty を当てるが、Safariのpretty実装は
+   段落全体を最適化するため、和文では行末が大きく空く(折り返しが
+   早すぎるように見える)。既定の折り返しへ戻す。見出しのbalanceは
+   維持する。 */
+.content p,
+.content li {
+  text-wrap: wrap;
+}
+
+/* ---- 用語(初出)の強調 ---- */
+.term {
+  font-weight: 600;
+}
+
+/* ---- 手書きSVG図のテーマ対応 ---- */
+.book-figure {
+  margin: 1.5rem auto;
+  text-align: center;
+}
+
+.book-figure svg {
+  max-width: 100%;
+  height: auto;
+}
+
+.book-figure figcaption {
+  margin-top: 0.5rem;
+  font-size: var(--sl-text-sm);
+  color: var(--sl-color-gray-3);
+}

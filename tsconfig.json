@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "target": "ES2023",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "skipLibCheck": true,
+    "types": [
+      "vite/client"
+    ],
+    "allowJs": true,
+    "noEmit": true
+  },
+  "include": [
+    "config",
+    "scripts",
+    "src/theme",
+    "vite.config.ts",
+    "void.config.ts"
+  ]
+}

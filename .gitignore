@@ -1,0 +1,25 @@
+# build output
+dist/
+.ox-docs/
+
+# dependencies
+node_modules/
+
+# Rust
+examples/target/
+
+# local plans (session coordination)
+plans/
+
+# void
+.void
+.wrangler
+
+# misc
+.DS_Store
+*.log
+.e2e-shots/
+snippet-check/target/
+snippet-check/run.*/
+refs/
+.void-wrangler.jsonc

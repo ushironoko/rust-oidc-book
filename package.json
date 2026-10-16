@@ -1,0 +1,29 @@
+{
+  "name": "rust-oidc-book",
+  "type": "module",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "vite dev",
+    "build": "vite build",
+    "preview": "vite preview",
+    "deploy": "void deploy --dir dist",
+    "ogp": "bun run scripts/generate-ogp.ts",
+    "deploy:preview": "void deploy --project rust-oidc-book-preview --dir dist"
+  },
+  "dependencies": {
+    "@ox-content/code-play": "3.0.0-alpha.9",
+    "@ox-content/theme-color-github": "3.0.0-alpha.9",
+    "@ox-content/theme-holo": "3.0.0-alpha.9",
+    "@ox-content/vite-plugin": "3.0.0-alpha.9",
+    "shiki": "4.4.2",
+    "vite": "8.2.2"
+  },
+  "devDependencies": {
+    "@mermaid-js/mermaid-cli": "^11.16.0",
+    "@resvg/resvg-js": "2.6.2",
+    "@types/react": "19.2.18",
+    "satori": "0.29.0",
+    "void": "1.1.11"
+  }
+}
