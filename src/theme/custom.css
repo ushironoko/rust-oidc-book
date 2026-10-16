@@ -320,3 +320,10 @@ ox-code-play {
   font-size: var(--sl-text-sm);
   color: var(--sl-color-gray-3);
 }
+
+/* ---- mermaid シーケンス図の参加者名 ----
+   プラグインの .actor が枠と文字の両方に背景色を塗るため、文字だけ本文色に戻す */
+.ox-mermaid svg text.actor,
+.ox-mermaid svg text.actor > tspan {
+  fill: var(--octc-color-text) !important;
+}
