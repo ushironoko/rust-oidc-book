@@ -58,12 +58,15 @@ docs/                 # 本文 (Markdown)
   appendix/           #   用語集・RFCの読み方・RFC・仕様の索引・さらに学ぶには
 src/snippets/         # 実行可能なRustコード (表示・実行・検証の単一ソース)
 src/theme/            # カスタムCSS / RustPlay出力整形JS / UI日本語化JS
+src/glossary/         # 用語集の元データ (章ごとの断片。bun run gen:appendix で docs/appendix/glossary.md を生成)
 config/sidebar.mjs    # frontmatter からサイドバーを生成
 scripts/preprocess-docs.mjs  # <RustPlay> を展開して .ox-docs/ へ出力
 scripts/verify-build.mjs     # ビルド後検証 (mermaid / note / play / pager)
 scripts/lint-style.mjs       # STYLE.md の機械検査
 scripts/check-snippets.sh    # スニペットを Playground と同じクレート版で手元実行
 scripts/play.sh              # スニペットを Playground API で実行
+scripts/merge-glossary.py    # 用語集の生成 (重複は初出の章を残す)
+scripts/rfc-index.py         # 付録「RFC・仕様の索引」の生成
 examples/             # ローカル実行用Cargoワークスペース (mini-op / rp / resource-server / flow-test)
 ```
 
